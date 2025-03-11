@@ -1,13 +1,29 @@
-import express from 'express';
-import configure from './routers';
+import express, { Application, Request, Response, NextFunction } from 'express';
+import { json } from 'body-parser';
+import { resolve } from 'path';
+import api from './routers/api';
 
-const app = express();
-const port = process.env.PORT || 3000;
+export default function configure(app: Application) {
+    app
+        .get('/', (req, res, next) => {
+            res.sendFile(resolve(__dirname, '../index.html'));
+        })
+        .use(express.static('public'))
+        .use(json())
+        .use('/api', api())
+        .use('/error', (req, res, next) => {
+            next(new Error('Other Error'));
+        })
+        .use((req, res, next) => {
+            next(new Error('Not Found'));
+        })
+        .use((error: Error, req: Request, res: Response, next: NextFunction) => {
+            switch (error.message) {
+                case 'Not Found':
+                    res.sendFile(resolve(__dirname, '../notfound.html'));
+                    return;
+            }
 
-configure(app);
-
-console.log(`Attempting to start server on port ${port}`);
-
-app.listen(port, () => {
-    console.log(`Listening on port ${port}`);
-});
+            res.sendFile(resolve(__dirname, '../error.html'));
+        });
+}
