@@ -4,7 +4,7 @@ import { resolve} from 'path';
 import multer from 'multer';
 import Sharp from 'sharp';
 
-const uploads = multer({ dest: 'public/uploads' });
+const uploads = multer({ dest: 'public/uploads' }); // file yg diupload otomatis ke folder public/upload
 
 export default function users() {
     const router = Router();
@@ -17,7 +17,7 @@ export default function users() {
                 lastname: 'Morgan',
             });
         })
-        .post('/avatar', uploads.single('avatar'), (req, res, next) => {
+        .post('/avatar', uploads.single('avatar'), (req, res, next) => {        //upload single avatar
             if (!!req.file) {
                 res.json({
                     url: `/uploads/${req.file.filename}`,
@@ -28,17 +28,20 @@ export default function users() {
         })
         .post('/watermark', uploads.single('file'), async (req, res, next) => {
             if (!!req.file) {
-                const watermark = Sharp(await readFile(req.file.path)).composite([
-                    { input: await readFile(resolve('./images/covalence_trans.png')), left: 50, top: 50 }
-                ]).png().toBuffer();
+                const watermark = Sharp(await readFile(req.file.path))
+                .composite([      //nambah watermark
+                    { input: await readFile(resolve('./images/covalence_trans.png')),
+                        left: 50,       //posisi watermark
+                        top: 50 }
+                ]).png().toBuffer();  //ubah format jadi png
 
-                const fileName = `watermarked-${Date.now()}.png`;
+                const fileName = `watermarked-${Date.now()}.png`; //pake date now supaya namanya unik
 
-                await writeFile(resolve(`./public/uploads/${fileName}`), await watermark);
+                await writeFile(resolve(`./public/uploads/${fileName}`), await watermark);  //nyimpen file
 
                 res.json({
                     url: `/uploads/${fileName}`,
-                });
+                });     //kirim gambar yang udah dikasi watermark
             } else {
                 next(new Error('No file found'));
             }
