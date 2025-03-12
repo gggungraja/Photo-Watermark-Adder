@@ -2,7 +2,7 @@
   "name": "expressbasics",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "main": "index.js",
   "scripts": {
     "ts": "tsc -p .",
     "start": "npm run ts && node index.js",
